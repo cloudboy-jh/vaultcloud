@@ -1,5 +1,12 @@
 // Mock data for VaultCloud
-export const mockApiKeys = [
+export const mockApiKeys: {
+  id: string;
+  name: string;
+  key: string;
+  created: string;
+  expires: string;
+  status: 'active' | 'expired' | 'revoked';
+}[] = [
   {
     id: '1',
     name: 'Production API Key',

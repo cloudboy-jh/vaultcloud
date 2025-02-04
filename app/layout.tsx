@@ -9,7 +9,10 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'VaultCloud - API Key Management',
-  description: 'Secure API key management and usage tracking',
+  description: '',
+  icons: {
+    icon: '/webicon.png',
+  },
 };
 
 export default function RootLayout({

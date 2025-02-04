@@ -11,6 +11,7 @@ import {
   Copy,
   MoreVertical,
   Plus,
+  Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,18 +30,51 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { ApiKeysTable } from '@/components/api-keys-table';
+import { NewApiKeyDialog } from '@/components/new-api-key-dialog';
+import { useState } from 'react';
+import type { ApiKey } from '@/types/api-key';
 
 export default function Home() {
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [newKeyDialogOpen, setNewKeyDialogOpen] = useState(false);
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success('API key copied to clipboard');
   };
 
+  const handleEditKey = (key: any) => {
+    // Implement edit functionality
+    console.log('Edit key:', key);
+  };
+
+  const handleRevokeKey = (key: ApiKey) => {
+    setApiKeys((prevKeys) => prevKeys.filter((k) => k.id !== key.id));
+    toast.success('API key revoked successfully');
+  };
+
+  const handleCreateKey = (name: string, content: string) => {
+    const newKey: ApiKey = {
+      id: Date.now().toString(),
+      name,
+      key: content,
+      created: new Date().toISOString(),
+      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'active',
+    };
+    setApiKeys((prevKeys) => [...prevKeys, newKey]);
+    setNewKeyDialogOpen(false);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <Button>
+        <div className="flex items-center gap-2">
+          <Lock className="h-6 w-6" />
+          <h1 className="text-3xl font-bold">Your Vault</h1>
+        </div>
+        <Button onClick={() => setNewKeyDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           New API Key
         </Button>
@@ -95,64 +129,11 @@ export default function Home() {
           <CardTitle>API Keys</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>API Key</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Expires</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockApiKeys.map((key) => (
-                <TableRow key={key.id}>
-                  <TableCell className="font-medium">{key.name}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <code className="bg-muted px-2 py-1 rounded">{key.key}</code>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => copyToClipboard(key.key)}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                  <TableCell>{new Date(key.created).toLocaleDateString()}</TableCell>
-                  <TableCell>{new Date(key.expires).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <span className={cn(
-                      "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                      key.status === 'active' ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" :
-                      key.status === 'expired' ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100" :
-                      "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
-                    )}>
-                      {key.status.charAt(0).toUpperCase() + key.status.slice(1)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          Revoke
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <ApiKeysTable 
+            apiKeys={apiKeys}
+            onEdit={handleEditKey}
+            onRevoke={handleRevokeKey}
+          />
         </CardContent>
       </Card>
 
@@ -195,6 +176,12 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
+
+      <NewApiKeyDialog
+        open={newKeyDialogOpen}
+        onOpenChange={setNewKeyDialogOpen}
+        onCreateKey={handleCreateKey}
+      />
     </div>
   );
 }

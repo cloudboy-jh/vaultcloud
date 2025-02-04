@@ -4,18 +4,21 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
-  KeyRound,
+  KeySquare,
   LayoutDashboard,
   LineChart,
   ScrollText,
   Settings,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useTheme } from 'next-themes';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'API Keys', href: '/keys', icon: KeyRound },
+  { name: 'API Keys', href: '/keys', icon: KeySquare },
   { name: 'Analytics', href: '/analytics', icon: LineChart },
   { name: 'Logs', href: '/logs', icon: ScrollText },
   { name: 'Settings', href: '/settings', icon: Settings },
@@ -24,6 +27,7 @@ const navigation = [
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   return (
     <div className={cn(
@@ -40,7 +44,7 @@ export function Sidebar() {
           onClick={() => setCollapsed(!collapsed)}
           className="p-0 hover:bg-transparent"
         >
-          <KeyRound className="h-6 w-6 text-primary transition-transform duration-300 hover:rotate-180" />
+          <KeySquare className="h-6 w-6 text-primary transition-transform duration-300 hover:rotate-180" />
         </Button>
         {!collapsed && <span className="text-lg font-semibold">VaultCloud</span>}
       </div>
@@ -70,6 +74,22 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      <div className={cn(
+        "p-2 border-t",
+        collapsed ? "flex justify-center" : "px-3"
+      )}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="h-9 w-9"
+        >
+          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </div>
     </div>
   );
 }
